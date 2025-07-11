@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servidor de Bandas - API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .endpoint {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+
+        .method {
+            font-weight: bold;
+            display: inline-block;
+            width: 70px;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .get {
+            background-color: #28a745;
+        }
+
+        .post {
+            background-color: #007bff;
+        }
+
+        .put {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .delete {
+            background-color: #dc3545;
+        }
+
+        .url {
+            font-family: monospace;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .description {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .bands-list {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .band-item {
+            background-color: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .vote-count {
+            background-color: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎸 Servidor de Bandas - API</h1>
+
+        <div class="status">
+            <strong>✅ Servidor funcionando correctamente</strong><br>
+            Socket.io habilitado para comunicación en tiempo real
+        </div>
+
+        <h2>📡 API Endpoints</h2>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <div class="url">/api/bands</div>
+            <div class="description">Obtener lista de todas las bandas</div>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <div class="url">/api/bands</div>
+            <div class="description">Agregar nueva banda (requiere JSON: {"name": "Nombre de la banda"})</div>
+        </div>
+
+        <div class="endpoint">
+            <span class="method put">PUT</span>
+            <div class="url">/api/bands/:id/vote</div>
+            <div class="description">Votar por una banda específica</div>
+        </div>
+
+        <div class="endpoint">
+            <span class="method delete">DELETE</span>
+            <div class="url">/api/bands/:id</div>
+            <div class="description">Eliminar una banda específica</div>
+        </div>
+
+        <h2>🎵 Bandas Actuales</h2>
+        <div class="bands-list" id="bands-container">
+            <div class="band-item">
+                <span>Queen</span>
+                <span class="vote-count">5 votos</span>
+            </div>
+            <div class="band-item">
+                <span>The Beatles</span>
+                <span class="vote-count">3 votos</span>
+            </div>
+            <div class="band-item">
+                <span>Led Zeppelin</span>
+                <span class="vote-count">8 votos</span>
+            </div>
+            <div class="band-item">
+                <span>Pink Floyd</span>
+                <span class="vote-count">2 votos</span>
+            </div>
+        </div>
+
+        <h2>🔌 Socket.io Events</h2>
+        <div class="endpoint">
+            <strong>active-bands</strong> - Recibe la lista actualizada de bandas
+        </div>
+        <div class="endpoint">
+            <strong>vote-band</strong> - Envía voto para una banda
+        </div>
+        <div class="endpoint">
+            <strong>add-band</strong> - Envía nueva banda
+        </div>
+        <div class="endpoint">
+            <strong>delete-band</strong> - Envía eliminación de banda
+        </div>
+
+        <h2>📖 Cómo probar la API</h2>
+        <div class="endpoint">
+            <div class="description">
+                <strong>Obtener bandas:</strong><br>
+                <code>curl http://localhost:3000/api/bands</code>
+            </div>
+        </div>
+        <div class="endpoint">
+            <div class="description">
+                <strong>Agregar banda:</strong><br>
+                <code>curl -X POST http://localhost:3000/api/bands -H "Content-Type: application/json" -d '{"name":"Coldplay"}'</code>
+            </div>
+        </div>
+        <div class="endpoint">
+            <div class="description">
+                <strong>Votar por banda:</strong><br>
+                <code>curl -X PUT http://localhost:3000/api/bands/1/vote</code>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #666; font-size: 14px;">
+                🚀 Servidor de Bandas v1.0.0<br>
+                Express.js + Socket.io + Node.js
+            </p>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Inicializar Socket.IO
+        const socket = io();
+
+        // Verificar conexión con el servidor
+        fetch('/api/bands')
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ Conexión exitosa con el servidor');
+                console.log('Bandas:', data);
+            })
+            .catch(error => {
+                console.error('❌ Error de conexión:', error);
+                document.querySelector('.status').innerHTML =
+                    '<strong>❌ Error de conexión con el servidor</strong>';
+                document.querySelector('.status').style.backgroundColor = '#f8d7da';
+                document.querySelector('.status').style.color = '#721c24';
+            });
+
+        // Manejar eventos de Socket.IO
+        socket.on('connect', () => {
+            console.log('🔌 Conectado a Socket.IO:', socket.id);
+            document.querySelector('.status').innerHTML =
+                '<strong>✅ Servidor funcionando correctamente</strong><br>' +
+                'Socket.io conectado: ' + socket.id;
+        });
+
+        socket.on('disconnect', () => {
+            console.log('🔌 Desconectado de Socket.IO');
+            document.querySelector('.status').innerHTML =
+                '<strong>⚠️ Desconectado del servidor</strong><br>' +
+                'Socket.io desconectado';
+            document.querySelector('.status').style.backgroundColor = '#fff3cd';
+            document.querySelector('.status').style.color = '#856404';
+        });
+
+        // Escuchar actualizaciones de bandas en tiempo real
+        socket.on('active-bands', (bands) => {
+            console.log('🎵 Bandas actualizadas:', bands);
+            updateBandsList(bands);
+        });
+
+        // Función para actualizar la lista de bandas en la página
+        function updateBandsList(bands) {
+            const container = document.getElementById('bands-container');
+            container.innerHTML = '';
+
+            bands.forEach(band => {
+                const bandItem = document.createElement('div');
+                bandItem.className = 'band-item';
+                bandItem.innerHTML = `
+                    <span>${band.name}</span>
+                    <span class="vote-count">${band.votes} votos</span>
+                `;
+                container.appendChild(bandItem);
+            });
+        }
+    </script>
+</body>
+
+</html>

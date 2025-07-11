@@ -1,0 +1,60 @@
+# Archivos de entorno
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependencias
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Archivos de runtime
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory usado por herramientas como istanbul
+coverage/
+*.lcov
+
+# Directorio de dependencias opcionales de npm
+.npm
+
+# Archivos de configuración opcional de eslint
+.eslintcache
+
+# Archivos de Microbundle
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Directorio de dependencias opcionales (npm)
+.pnp/
+.pnp.js
+
+# Archivos de yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Archivos de editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
