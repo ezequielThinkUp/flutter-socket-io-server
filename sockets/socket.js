@@ -1,7 +1,7 @@
 const { Server } = require('socket.io');
 
 // Configuración de Socket.IO
-function initializeSocket(httpServer, bands) {
+function initializeSocket(httpServer, bandsManager) {
     const io = new Server(httpServer, {
         cors: {
             origin: process.env.SOCKET_IO_CORS_ORIGIN || "*",
@@ -14,16 +14,17 @@ function initializeSocket(httpServer, bands) {
         console.log('Cliente conectado:', socket.id);
 
         // Enviar lista de bandas al cliente recién conectado
-        socket.emit('active-bands', bands);
+        socket.emit('active-bands', bandsManager.getBands());
 
         // Manejar eventos de socket
         socket.on('vote-band', (payload) => {
             const { id } = payload;
-            const band = bands.find(band => band.id === id);
 
-            if (band) {
-                band.votes += 1;
-                io.emit('active-bands', bands);
+            try {
+                const band = bandsManager.voteBand(id);
+                io.emit('active-bands', bandsManager.getBands());
+            } catch (error) {
+                console.error('Error al votar:', error.message);
             }
         });
 
@@ -31,25 +32,31 @@ function initializeSocket(httpServer, bands) {
             const { name } = payload;
 
             if (name && name.trim() !== '') {
-                const newBand = {
-                    id: Date.now().toString(),
-                    name: name.trim(),
-                    votes: 0
-                };
-
-                bands.push(newBand);
-                io.emit('active-bands', bands);
+                try {
+                    const newBand = bandsManager.addBand(name.trim());
+                    io.emit('active-bands', bandsManager.getBands());
+                } catch (error) {
+                    console.error('Error al agregar banda:', error.message);
+                }
             }
         });
 
         socket.on('delete-band', (payload) => {
             const { id } = payload;
 
-            const bandIndex = bands.findIndex(band => band.id === id);
-            if (bandIndex !== -1) {
-                bands.splice(bandIndex, 1);
-                io.emit('active-bands', bands);
+            try {
+                const deletedBand = bandsManager.deleteBand(id);
+                io.emit('active-bands', bandsManager.getBands());
+                console.log('Banda eliminada:', deletedBand);
+            } catch (error) {
+                console.error('Error al eliminar banda:', error.message);
             }
+        });
+
+        socket.on('nuevo-mensaje', (data) => {
+            console.log('Mensaje recibido:', data);
+            // Emitir el mensaje a todos los clientes conectados
+            io.emit('nuevo-mensaje', data);
         });
 
         socket.on('disconnect', () => {

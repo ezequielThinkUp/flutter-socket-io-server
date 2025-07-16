@@ -4,6 +4,8 @@ const express = require('express');
 const path = require('path');
 const { createServer } = require('http');
 const { initializeSocket } = require('./sockets/socket');
+const Bands = require('./models/bands');
+const Band = require('./models/band');
 
 const app = express();
 const httpServer = createServer(app);
@@ -15,20 +17,19 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
-// Lista de bandas inicial
-let bands = [
-  { id: '1', name: 'Queen', votes: 5 },
-  { id: '2', name: 'The Beatles', votes: 3 },
-  { id: '3', name: 'Led Zeppelin', votes: 8 },
-  { id: '4', name: 'Pink Floyd', votes: 2 }
-];
+// Inicializar lista de bandas con el modelo
+const bandsManager = new Bands();
+// Inicializar con bandas predeterminadas
+Band.initState().forEach(band => {
+  bandsManager.bands.push(band);
+});
 
 // Inicializar Socket.IO
-const io = initializeSocket(httpServer, bands);
+const io = initializeSocket(httpServer, bandsManager);
 
 // Rutas HTTP
 app.get('/api/bands', (req, res) => {
-  res.json(bands);
+  res.json(bandsManager.getBands());
 });
 
 app.post('/api/bands', (req, res) => {
@@ -38,52 +39,46 @@ app.post('/api/bands', (req, res) => {
     return res.status(400).json({ error: 'El nombre de la banda es requerido' });
   }
 
-  const newBand = {
-    id: Date.now().toString(),
-    name: name.trim(),
-    votes: 0
-  };
+  try {
+    const newBand = bandsManager.addBand(name.trim());
 
-  bands.push(newBand);
+    // Emitir a todos los clientes conectados
+    io.emit('active-bands', bandsManager.getBands());
 
-  // Emitir a todos los clientes conectados
-  io.emit('active-bands', bands);
-
-  res.json(newBand);
+    res.json(newBand.toJSON());
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
 app.delete('/api/bands/:id', (req, res) => {
   const { id } = req.params;
 
-  const bandIndex = bands.findIndex(band => band.id === id);
+  try {
+    const deletedBand = bandsManager.deleteBand(id);
 
-  if (bandIndex === -1) {
-    return res.status(404).json({ error: 'Banda no encontrada' });
+    // Emitir a todos los clientes conectados
+    io.emit('active-bands', bandsManager.getBands());
+
+    res.json(deletedBand);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
   }
-
-  const deletedBand = bands.splice(bandIndex, 1)[0];
-
-  // Emitir a todos los clientes conectados
-  io.emit('active-bands', bands);
-
-  res.json(deletedBand);
 });
 
 app.put('/api/bands/:id/vote', (req, res) => {
   const { id } = req.params;
 
-  const band = bands.find(band => band.id === id);
+  try {
+    const band = bandsManager.voteBand(id);
 
-  if (!band) {
-    return res.status(404).json({ error: 'Banda no encontrada' });
+    // Emitir a todos los clientes conectados
+    io.emit('active-bands', bandsManager.getBands());
+
+    res.json(band);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
   }
-
-  band.votes += 1;
-
-  // Emitir a todos los clientes conectados
-  io.emit('active-bands', bands);
-
-  res.json(band);
 });
 
 
