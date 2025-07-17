@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 const { createServer } = require('http');
 const { initializeSocket } = require('./sockets/socket');
 const Bands = require('./models/bands');
@@ -14,6 +15,11 @@ const httpServer = createServer(app);
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json());
 app.use(express.static('public'));
 

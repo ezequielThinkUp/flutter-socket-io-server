@@ -1,0 +1,28 @@
+# fly.toml app configuration file generated for band-names-server
+app = "band-names-server"
+primary_region = "mia"
+
+[build]
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+  APP_NAME = "band_names_server"
+  APP_VERSION = "1.5.0"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512
+
+[[statics]]
+  guest_path = "/app/public"
+  url_prefix = "/" 
